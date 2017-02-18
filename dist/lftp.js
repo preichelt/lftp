@@ -177,7 +177,7 @@ class LFTP {
 
   at(time) {
     if (!time) {
-      return this;
+      this.fail('at() requires time argument');
     }
 
     return this.raw(`at ${this._escapeShell(time)}`);
@@ -185,16 +185,16 @@ class LFTP {
 
   attach(pid) {
     if (!pid) {
-      return this;
+      this.fail('attach() requires pid argument');
     }
 
     return this.raw(`attach ${pid}`);
   }
 
-  bookmark(subCMD, opts = {}) {
+  bookmark(subCmd, opts = {}) {
     const cmd = ['bookmark'];
 
-    switch (subCMD) {
+    switch (subCmd) {
       case 'add':
         if (opts.hasOwnProperty('name')) {
           cmd.push(`add ${this._escapeShell(opts.name)}`);
@@ -202,12 +202,16 @@ class LFTP {
           if (opts.hasOwnProperty('loc')) {
             cmd.push(this._escapeShell(opts.loc));
           }
+        } else {
+          this.fail('bookmark(add) opts argument requires name property');
         }
 
         break;
       case 'del':
         if (opts.hasOwnProperty('name')) {
           cmd.push(`del ${this._escapeShell(opts.name)}`);
+        } else {
+          this.fail('bookmark(del) opts argument requires name property');
         }
 
         break;
@@ -218,6 +222,8 @@ class LFTP {
       case 'import':
         if (opts.hasOwnProperty('type')) {
           cmd.push(`import ${this._escapeShell(opts.type)}`);
+        } else {
+          this.fail('bookmark(import) opts argument requires type property');
         }
 
         break;
@@ -225,29 +231,29 @@ class LFTP {
         cmd.push('list');
 
         break;
-    }
-
-    if (cmd.length === 1) {
-      return this;
+      default:
+        this.fail('bookmark() requires subCmd argument');
     }
 
     return this.raw(cmd.join(' '));
   }
 
-  cache(subCMD, opts = {}) {
+  cache(subCmd, opts = {}) {
     const cmd = ['cache'];
 
-    switch (subCMD) {
+    switch (subCmd) {
       case 'stat':
       case 'on':
       case 'off':
       case 'flush':
-        cmd.push(subCMD);
+        cmd.push(subCmd);
 
         break;
       case 'size':
         if (opts.hasOwnProperty('lim')) {
           cmd.push(`size ${opts.lim}`);
+        } else {
+          this.fail('cache(size) opts argument requires lim property');
         }
 
         break;
@@ -257,13 +263,13 @@ class LFTP {
         if (opts.hasOwnProperty('n') && opts.hasOwnProperty('unit') && (0, _includes3.default)(acceptableUnits, opts.unit)) {
 
           cmd.push(`expire ${opts.n}${opts.unit}`);
+        } else {
+          this.fail('cache(expire) opts argument requires n and unit properties');
         }
 
         break;
-    }
-
-    if (cmd.length === 1) {
-      return this;
+      default:
+        this.fail('cache() requires subCmd argument');
     }
 
     return this.raw(cmd.join(' '));
@@ -271,7 +277,7 @@ class LFTP {
 
   cat(path) {
     if (!path) {
-      return this;
+      this.fail('cat() requires path argument');
     }
 
     return this.raw(`cat ${this._escapeShell(path)}`);
@@ -279,18 +285,22 @@ class LFTP {
 
   cd(dir) {
     if (!dir) {
-      return this;
+      this.fail('cd() requires dir argument');
     }
 
     return this.raw(`cd ${this._escapeShell(dir)}`);
   }
 
   chmod(mode, ...files) {
-    if (!mode || files.length === 0) {
-      return this;
+    if (!mode) {
+      this.fail('chmod() requires mode argument');
+    } else if (files.length === 0) {
+      this.fail('chmod() requires files argument(s)');
     }
 
-    return this.raw(`chmod ${mode} ${(0, _map3.default)(files, this._escapeShell.bind(this)).join(' ')}`);
+    const filesStr = (0, _map3.default)(files, this._escapeShell.bind(this)).join(' ');
+
+    return this.raw(`chmod ${mode} ${filesStr}`);
   }
 
   close(all = false) {
@@ -306,19 +316,15 @@ class LFTP {
   cls(opts = {}) {
     const cmd = ['cls'];
 
-    const singleColumn = opts.hasOwnProperty('singleColumn') && opts.singleColumn;
-
-    if (singleColumn) {
+    if (opts.singleColumn) {
       cmd.push('-1');
     }
 
-    const dirsFirst = opts.hasOwnProperty('dirsFirst') && opts.dirsFirst;
-    if (dirsFirst) {
+    if (opts.dirsFirst) {
       cmd.push('-D');
     }
 
-    const cmdString = cmd.join(' ');
-    return this.raw(cmdString);
+    return this.raw(cmd.join(' '));
   }
 
   // NOTE: NEED TO IMPLEMENT
@@ -333,11 +339,13 @@ class LFTP {
   edit(file, opts = {}) {
     const cmd = ['edit'];
 
-    if (!file && (0, _typeDetect2.default)(file) !== 'string') {
-      return this;
+    if (!file) {
+      this.fail('edit() requires file argument');
+    } else if ((0, _typeDetect2.default)(file) !== 'string') {
+      this.fail('edit() file argument must be a string');
     }
 
-    if (opts.hasOwnProperty('keepTempFile') && opts.keepTempFile) {
+    if (opts.keepTempFile) {
       cmd.push('-k');
     }
 
@@ -372,7 +380,7 @@ class LFTP {
       cmd.push(`-d ${opts.maxScanDepth}`);
     }
 
-    if (opts.hasOwnProperty('longListing') && opts.longListing) {
+    if (opts.longListing) {
       cmd.push('-l');
     }
 
@@ -385,24 +393,24 @@ class LFTP {
 
   get(remotePath, opts = {}) {
     if (!remotePath) {
-      return this;
+      this.fail('get() require remotePath argument');
     }
 
     const cmd = ['get'];
 
-    if (opts.hasOwnProperty('continue') && opts.continue) {
+    if (opts.continue) {
       cmd.push('-c');
     }
 
-    if (opts.hasOwnProperty('deleteSrcOnSuccess') && opts.deleteSrcOnSuccess) {
+    if (opts.deleteSrcOnSuccess) {
       cmd.push('-E');
     }
 
-    if (opts.hasOwnProperty('deleteTargetBefore') && opts.deleteTargetBefore) {
+    if (opts.deleteTargetBefore) {
       cmd.push('-e');
     }
 
-    if (opts.hasOwnProperty('asciiMode') && opts.asciiMode) {
+    if (opts.asciiMode) {
       cmd.push('-a');
     }
 
@@ -421,7 +429,7 @@ class LFTP {
 
   get1(remoteFile, opts = {}) {
     if (!remoteFile) {
-      return this;
+      this.fail('get1() requires remoteFile argument');
     }
 
     const cmd = ['get1'];
@@ -430,15 +438,15 @@ class LFTP {
       cmd.push(`-o ${this._escapeShell(opts.destFileName)}`);
     }
 
-    if (opts.hasOwnProperty('continue') && opts.continue) {
+    if (opts.continue) {
       cmd.push('-c');
     }
 
-    if (opts.hasOwnProperty('deleteSrcOnSuccess') && opts.deleteSrcOnSuccess) {
+    if (opts.deleteSrcOnSuccess) {
       cmd.push('-E');
     }
 
-    if (opts.hasOwnProperty('asciiMode') && opts.asciiMode) {
+    if (opts.asciiMode) {
       cmd.push('-a');
     }
 
@@ -457,31 +465,31 @@ class LFTP {
 
   glob(patterns, opts = {}) {
     if (!patterns) {
-      return this;
+      this.fail('glob() requires patterns argument');
     }
 
     const cmd = ['glob'];
 
-    if (opts.hasOwnProperty('plainFiles') && opts.plainFiles) {
+    if (opts.plainFiles) {
       cmd.push('-f');
     }
 
-    if (opts.hasOwnProperty('directories') && opts.directories) {
+    if (opts.directories) {
       cmd.push('-d');
     }
 
-    if (opts.hasOwnProperty('allTypes') && opts.allTypes) {
+    if (opts.allTypes) {
       cmd.push('-a');
     }
 
     let existanceSpecified = false;
 
-    if (opts.hasOwnProperty('exist') && opts.exist) {
+    if (opts.exist) {
       cmd.push(`--exist ${this._escapeShell(patterns)}`);
       existanceSpecified = true;
     }
 
-    if (opts.hasOwnProperty('notExist') && opts.notExist) {
+    if (opts.notExist) {
       cmd.push(`--not-exist ${this._escapeShell(patterns)}`);
       existanceSpecified = true;
     }
@@ -494,7 +502,7 @@ class LFTP {
       cmd.push(opts.command);
       cmd.push(this._escapeShell(patterns));
     } else if (!existanceSpecified && !commandSpecified) {
-      return this;
+      this.fail('glob() opts argument requires exist, notExist, and/or command properties');
     }
 
     return this.raw(cmd.join(' '));
@@ -519,7 +527,7 @@ class LFTP {
       }).join('')}`);
     }
 
-    if (opts.hasOwnProperty('notRecursive') && opts.notRecursive) {
+    if (opts.notRecursive) {
       cmd.push('-r');
     }
 
@@ -545,13 +553,15 @@ class LFTP {
   }
 
   ln(existingFile, newLink, opts = {}) {
-    if (!existingFile || !newLink) {
-      return this;
+    if (!existingFile) {
+      this.fail('ln() requires existingFile argument');
+    } else if (!newLink) {
+      this.fail('ln() requires newLink argument');
     }
 
     const cmd = ['ln'];
 
-    if (opts.hasOwnProperty('symbolic') && opts.symbolic) {
+    if (opts.symbolic) {
       cmd.push('-s');
     }
 
@@ -563,7 +573,7 @@ class LFTP {
 
   local(command) {
     if (!command) {
-      return this;
+      this.fail('local() requires command argument');
     }
 
     return this.raw(`local ${command}`);
@@ -581,11 +591,12 @@ class LFTP {
     return this.raw('pwd');
   }
 
-  put(localPath, remotePath) {
+  put(localPath, opts = {}) {
     if (!localPath) {
-      return this;
+      this.fail('put() requires localPath argument');
     }
 
+    const remotePath = opts.remotePath;
     if (!remotePath) {
       return this.raw(`put ${this._escapeShell(localPath)}`);
     }
@@ -594,8 +605,10 @@ class LFTP {
   }
 
   mv(src, dest) {
-    if (!src || !dest) {
-      return this;
+    if (!src) {
+      this.fail('mv() requires src argument');
+    } else if (!dest) {
+      this.fail('mv() requires dest argument');
     }
 
     return this.raw(`mv ${this._escapeShell(src)} ${this._escapeShell(dest)}`);
@@ -603,29 +616,35 @@ class LFTP {
 
   rm(...files) {
     if (files.length === 0) {
-      return this;
+      this.fail('rm() requires files argument(s)');
     }
 
-    return this.raw(`rm ${(0, _map3.default)(files, this._escapeShell.bind(this)).join(' ')}`);
+    const filesStr = (0, _map3.default)(files, this._escapeShell.bind(this)).join(' ');
+
+    return this.raw(`rm ${filesStr}`);
   }
 
   rmdir(...directories) {
     if (directories.length === 0) {
-      return this;
+      this.fail('rmdir() requires directories argument(s)');
     }
 
-    return this.raw(`rmdir ${(0, _map3.default)(directories, this._escapeShell.bind(this)).join(' ')}`);
+    const directoriesStr = (0, _map3.default)(directories, this._escapeShell.bind(this)).join(' ');
+
+    return this.raw(`rmdir ${directoriesStr}`);
   }
 
-  mirror(remoteDir, localDir, opts = {}) {
-    const upload = opts.hasOwnProperty('upload') && opts.upload;
+  mirror(remoteDir, opts = {}) {
+    const upload = opts.upload;
+    const localDir = opts.localDir;
 
-    if (!remoteDir || upload && !localDir) {
-      return this;
+    if (!remoteDir) {
+      this.fail('mirror() requires remoteDir argument');
+    } else if (upload && !localDir) {
+      this.fail('mirror(opts = {upload: true}) opts argument requires localDir property');
     }
 
-    const queue = opts.hasOwnProperty('queue') && opts.queue;
-    const cmd = queue ? ['queue mirror'] : ['mirror'];
+    const cmd = opts.queue ? ['queue mirror'] : ['mirror'];
 
     if (upload) {
       cmd.push('--reverse');
@@ -655,26 +674,26 @@ class LFTP {
       cmd.push(`${this._escapeShell(remoteDir)} ${this._escapeShell(localDir)}`);
     }
 
-    const cmdString = cmd.join(' ');
-    return this.raw(cmdString);
+    return this.raw(cmd.join(' '));
   }
 
-  pget(n, remotePath, localPath, opts = {}) {
-    if (!n || !remotePath) {
-      return this;
+  pget(remotePath, opts = {}) {
+    if (!remotePath) {
+      this.fail('pget() requires remotePath argument');
     }
 
-    const queue = opts.hasOwnProperty('queue') && opts.queue;
-    const cmd = queue ? ['queue pget'] : ['pget'];
+    const cmd = opts.queue ? ['queue pget'] : ['pget'];
+
+    const n = opts.n || 4;
     cmd.push(`-n ${n}`);
     cmd.push(`${this._escapeShell(remotePath)}`);
 
+    const localPath = opts.localPath;
     if (localPath) {
       cmd.push(`-o ${this._escapeShell(localPath)}`);
     }
 
-    const cmdString = cmd.join(' ');
-    return this.raw(cmdString);
+    return this.raw(cmd.join(' '));
   }
 }
 exports.LFTP = LFTP;
