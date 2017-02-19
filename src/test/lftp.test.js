@@ -60,6 +60,17 @@ test('constructor', (t) => {
   t.deepEqual(lftp.cmds, [])
 })
 
+test('fail', (t) => {
+  t.plan(2)
+
+  const lftp = lftpInit()
+  const error = t.throws(() => {
+    lftp.fail('Failure Message')
+  }, Error)
+
+  t.is(error.message, 'Failure Message')
+})
+
 test('validateOptions', (t) => {
   t.plan(4)
 
@@ -94,12 +105,16 @@ test('escapeShell', (t) => {
 })
 
 test('_escapeShell', (t) => {
-  t.plan(1)
+  t.plan(2)
 
   const lftp = lftpInit()
   const escapeShellStub = sinon.stub(lftp, 'escapeShell')
-  lftp._escapeShell('')
-  t.true(escapeShellStub.called)
+  lftp._escapeShell('command')
+  t.true(escapeShellStub.calledWith('command'))
+
+  lftp.options.escape = false
+  const anotherCommand = lftp._escapeShell('another command')
+  t.is(anotherCommand, 'another command')
 })
 
 test('baseCmd', (t) => {
@@ -129,7 +144,7 @@ test('baseCmd', (t) => {
 })
 
 test('exec', (t) => {
-  t.plan(12)
+  t.plan(24)
 
   const lftp = lftpInit()
   const baseCmd = lftp.baseCmd().join(';')
@@ -142,6 +157,28 @@ test('exec', (t) => {
   t.is(spawn.calls.length, 1)
   t.is(spawn.calls[0].command, 'lftp')
   t.deepEqual(spawn.calls[0].args, ['-c', `${baseCmd};cmd1;cmd2;cmd3`])
+  t.deepEqual(spawn.calls[0].opts, {})
+  t.deepEqual(lftp.cmds, [])
+
+  spawn = mockSpawn()
+  lftp.spawn = spawn
+
+  execPromise = lftp.exec('extraCmd')
+  t.is(typeDetect(execPromise), 'Promise')
+  t.is(spawn.calls.length, 1)
+  t.is(spawn.calls[0].command, 'lftp')
+  t.deepEqual(spawn.calls[0].args, ['-c', `${baseCmd};extraCmd`])
+  t.deepEqual(spawn.calls[0].opts, {})
+  t.deepEqual(lftp.cmds, [])
+
+  spawn = mockSpawn()
+  lftp.spawn = spawn
+
+  execPromise = lftp.exec(['extraCmd1','extraCmd2'])
+  t.is(typeDetect(execPromise), 'Promise')
+  t.is(spawn.calls.length, 1)
+  t.is(spawn.calls[0].command, 'lftp')
+  t.deepEqual(spawn.calls[0].args, ['-c', `${baseCmd};extraCmd1;extraCmd2`])
   t.deepEqual(spawn.calls[0].opts, {})
   t.deepEqual(lftp.cmds, [])
 
