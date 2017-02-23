@@ -166,17 +166,17 @@ export class LFTP {
   at(time) {
     if(!time) {
       this.fail('at() requires time argument')
+    } else {
+      return this.raw(`at ${this._escapeShell(time)}`)
     }
-
-    return this.raw(`at ${this._escapeShell(time)}`)
   }
 
   attach(pid) {
     if(!pid) {
       this.fail('attach() requires pid argument')
+    } else {
+      return this.raw(`attach ${pid}`)
     }
-
-    return this.raw(`attach ${pid}`)
   }
 
   bookmark(subCmd, opts = {}) {
@@ -268,17 +268,17 @@ export class LFTP {
   cat(path) {
     if(!path) {
       this.fail('cat() requires path argument')
+    } else {
+      return this.raw(`cat ${this._escapeShell(path)}`)
     }
-
-    return this.raw(`cat ${this._escapeShell(path)}`)
   }
 
   cd(dir) {
     if(!dir) {
       this.fail('cd() requires dir argument')
+    } else {
+      return this.raw(`cd ${this._escapeShell(dir)}`)
     }
-
-    return this.raw(`cd ${this._escapeShell(dir)}`)
   }
 
   chmod(mode, ...files) {
@@ -286,11 +286,11 @@ export class LFTP {
       this.fail('chmod() requires mode argument')
     } else if(files.length === 0) {
       this.fail('chmod() requires files argument(s)')
+    } else {
+      const filesStr = _map(files, this._escapeShell.bind(this)).join(' ')
+
+      return this.raw(`chmod ${mode} ${filesStr}`)
     }
-
-    const filesStr = _map(files, this._escapeShell.bind(this)).join(' ')
-
-    return this.raw(`chmod ${mode} ${filesStr}`)
   }
 
   close(all = false) {
@@ -339,25 +339,25 @@ export class LFTP {
   }
 
   edit(file, opts = {}) {
-    const cmd = ['edit']
-
     if(!file) {
       this.fail('edit() requires file argument')
     } else if (typeDetect(file) !== 'string') {
       this.fail('edit() file argument must be a string')
+    } else {
+      const cmd = ['edit']
+
+      if(opts.keepTempFile) {
+        cmd.push('-k')
+      }
+
+      if(opts.hasOwnProperty('tempFileLocation')) {
+        cmd.push(`-o ${opts.tempFileLocation}`)
+      }
+
+      cmd.push(this._escapeShell(file))
+
+      return this.raw(cmd.join(' '))
     }
-
-    if(opts.keepTempFile) {
-      cmd.push('-k')
-    }
-
-    if(opts.hasOwnProperty('tempFileLocation')) {
-      cmd.push(`-o ${opts.tempFileLocation}`)
-    }
-
-    cmd.push(this._escapeShell(file))
-
-    return this.raw(cmd.join(' '))
   }
 
   // NOTE: NEED TO IMPLEMENT
@@ -396,118 +396,118 @@ export class LFTP {
   get(remotePath, opts = {}) {
     if(!remotePath) {
       this.fail('get() require remotePath argument')
+    } else {
+      const cmd = ['get']
+
+      if(opts.continue) {
+        cmd.push('-c')
+      }
+
+      if(opts.deleteSrcOnSuccess) {
+        cmd.push('-E')
+      }
+
+      if(opts.deleteTargetBefore) {
+        cmd.push('-e')
+      }
+
+      if(opts.asciiMode) {
+        cmd.push('-a')
+      }
+
+      if(opts.hasOwnProperty('base')) {
+        cmd.push(`-O ${this._escapeShell(opts.base)}`)
+      }
+
+      cmd.push(this._escapeShell(remotePath))
+
+      if(opts.hasOwnProperty('localPath')) {
+        cmd.push(`-o ${this._escapeShell(opts.localPath)}`)
+      }
+
+      return this.raw(cmd.join(' '))
     }
-
-    const cmd = ['get']
-
-    if(opts.continue) {
-      cmd.push('-c')
-    }
-
-    if(opts.deleteSrcOnSuccess) {
-      cmd.push('-E')
-    }
-
-    if(opts.deleteTargetBefore) {
-      cmd.push('-e')
-    }
-
-    if(opts.asciiMode) {
-      cmd.push('-a')
-    }
-
-    if(opts.hasOwnProperty('base')) {
-      cmd.push(`-O ${this._escapeShell(opts.base)}`)
-    }
-
-    cmd.push(this._escapeShell(remotePath))
-
-    if(opts.hasOwnProperty('localPath')) {
-      cmd.push(`-o ${this._escapeShell(opts.localPath)}`)
-    }
-
-    return this.raw(cmd.join(' '))
   }
 
   get1(remoteFile, opts = {}) {
     if(!remoteFile) {
       this.fail('get1() requires remoteFile argument')
+    } else {
+      const cmd = ['get1']
+
+      if(opts.hasOwnProperty('destFileName')) {
+        cmd.push(`-o ${this._escapeShell(opts.destFileName)}`)
+      }
+
+      if(opts.continue) {
+        cmd.push('-c')
+      }
+
+      if(opts.deleteSrcOnSuccess) {
+        cmd.push('-E')
+      }
+
+      if(opts.asciiMode) {
+        cmd.push('-a')
+      }
+
+      if(opts.hasOwnProperty('srcRegion')) {
+        cmd.push(`--source-region=${opts.srcRegion}`)
+      }
+
+      if(opts.hasOwnProperty('targetPos')) {
+        cmd.push(`--target-position=${opts.targetPos}`)
+      }
+
+      cmd.push(this._escapeShell(remoteFile))
+
+      return this.raw(cmd.join(' '))
     }
-
-    const cmd = ['get1']
-
-    if(opts.hasOwnProperty('destFileName')) {
-      cmd.push(`-o ${this._escapeShell(opts.destFileName)}`)
-    }
-
-    if(opts.continue) {
-      cmd.push('-c')
-    }
-
-    if(opts.deleteSrcOnSuccess) {
-      cmd.push('-E')
-    }
-
-    if(opts.asciiMode) {
-      cmd.push('-a')
-    }
-
-    if(opts.hasOwnProperty('srcRegion')) {
-      cmd.push(`--source-region=${opts.srcRegion}`)
-    }
-
-    if(opts.hasOwnProperty('targetPos')) {
-      cmd.push(`--target-position=${opts.targetPos}`)
-    }
-
-    cmd.push(this._escapeShell(remoteFile))
-
-    return this.raw(cmd.join(' '))
   }
 
   glob(patterns, opts = {}) {
     if(!patterns) {
       this.fail('glob() requires patterns argument')
+    } else {
+      const cmd = ['glob']
+
+      if(opts.plainFiles) {
+        cmd.push('-f')
+      }
+
+      if(opts.directories) {
+        cmd.push('-d')
+      }
+
+      if(opts.allTypes) {
+        cmd.push('-a')
+      }
+
+      let existanceSpecified = false
+
+      if(opts.exist) {
+        cmd.push(`--exist ${this._escapeShell(patterns)}`)
+        existanceSpecified = true
+      }
+
+      if(opts.notExist) {
+        cmd.push(`--not-exist ${this._escapeShell(patterns)}`)
+        existanceSpecified = true
+      }
+
+      const commandSpecified = opts.hasOwnProperty('command') ? true : false
+
+      if(existanceSpecified && commandSpecified) {
+        cmd.push(`&& ${opts.command}`)
+      } else if(!existanceSpecified && commandSpecified) {
+        cmd.push(opts.command)
+        cmd.push(this._escapeShell(patterns))
+      } else if(!existanceSpecified && !commandSpecified) {
+        this.fail('glob() opts argument requires exist, notExist, and/or command properties')
+      }
+
+      return this.raw(cmd.join(' '))
     }
-
-    const cmd = ['glob']
-
-    if(opts.plainFiles) {
-      cmd.push('-f')
-    }
-
-    if(opts.directories) {
-      cmd.push('-d')
-    }
-
-    if(opts.allTypes) {
-      cmd.push('-a')
-    }
-
-    let existanceSpecified = false
-
-    if(opts.exist) {
-      cmd.push(`--exist ${this._escapeShell(patterns)}`)
-      existanceSpecified = true
-    }
-
-    if(opts.notExist) {
-      cmd.push(`--not-exist ${this._escapeShell(patterns)}`)
-      existanceSpecified = true
-    }
-
-    const commandSpecified = opts.hasOwnProperty('command') ? true : false
-
-    if(existanceSpecified && commandSpecified) {
-      cmd.push(`&& ${opts.command}`)
-    } else if(!existanceSpecified && commandSpecified) {
-      cmd.push(opts.command)
-      cmd.push(this._escapeShell(patterns))
-    } else if(!existanceSpecified && !commandSpecified) {
-      this.fail('glob() opts argument requires exist, notExist, and/or command properties')
-    }
-
-    return this.raw(cmd.join(' '))
   }
 
   help(opts = {}) {
@@ -557,26 +557,26 @@ export class LFTP {
       this.fail('ln() requires existingFile argument')
     } else if(!newLink) {
       this.fail('ln() requires newLink argument')
+    } else {
+      const cmd = ['ln']
+
+      if(opts.symbolic) {
+        cmd.push('-s')
+      }
+
+      cmd.push(this._escapeShell(existingFile))
+      cmd.push(this._escapeShell(newLink))
+
+      return this.raw(cmd.join(' '))
     }
-
-    const cmd = ['ln']
-
-    if(opts.symbolic) {
-      cmd.push('-s')
-    }
-
-    cmd.push(this._escapeShell(existingFile))
-    cmd.push(this._escapeShell(newLink))
-
-    return this.raw(cmd.join(' '))
   }
 
   local(command) {
     if(!command) {
       this.fail('local() requires command argument')
+    } else {
+      return this.raw(`local ${command}`)
     }
-
-    return this.raw(`local ${command}`)
   }
 
   lpwd() {
@@ -594,18 +594,18 @@ export class LFTP {
   put(localPath, opts = {}) {
     if(!localPath) {
       this.fail('put() requires localPath argument')
-    }
+    } else {
+      const remotePath = opts.remotePath
+      if(!remotePath) {
+        return this.raw(`put ${this._escapeShell(localPath)}`)
+      }
 
-    const remotePath = opts.remotePath
-    if(!remotePath) {
-      return this.raw(`put ${this._escapeShell(localPath)}`)
+      return this.raw(`put ${
+        this._escapeShell(localPath)
+      } -o ${
+        this._escapeShell(remotePath)
+      }`)
     }
-
-    return this.raw(`put ${
-      this._escapeShell(localPath)
-    } -o ${
-      this._escapeShell(remotePath)
-    }`)
   }
 
   mv(src, dest) {
@@ -613,31 +613,31 @@ export class LFTP {
       this.fail('mv() requires src argument')
     } else if(!dest) {
       this.fail('mv() requires dest argument')
+    } else {
+      return this.raw(`mv ${this._escapeShell(src)} ${this._escapeShell(dest)}`)
     }
-
-    return this.raw(`mv ${this._escapeShell(src)} ${this._escapeShell(dest)}`)
   }
 
   rm(...files) {
     if(files.length === 0){
       this.fail('rm() requires files argument(s)')
+    } else {
+      const filesStr = _map(files, this._escapeShell.bind(this)).join(' ')
+
+      return this.raw(`rm ${filesStr}`)
     }
-
-    const filesStr = _map(files, this._escapeShell.bind(this)).join(' ')
-
-    return this.raw(`rm ${filesStr}`)
   }
 
   rmdir(...directories) {
     if(directories.length === 0){
       this.fail('rmdir() requires directories argument(s)')
+    } else {
+      const directoriesStr = _map(
+        directories, this._escapeShell.bind(this)
+      ).join(' ')
+
+      return this.raw(`rmdir ${directoriesStr}`)
     }
-
-    const directoriesStr = _map(
-      directories, this._escapeShell.bind(this)
-    ).join(' ')
-
-    return this.raw(`rmdir ${directoriesStr}`)
   }
 
   mirror(remoteDir, opts = {}) {
@@ -648,57 +648,57 @@ export class LFTP {
       this.fail('mirror() requires remoteDir argument')
     } else if(upload && !localDir) {
       this.fail('mirror(opts = {upload: true}) opts argument requires localDir property')
-    }
-
-    const cmd = opts.queue ? ['queue mirror'] : ['mirror']
-
-    if(upload) {
-      cmd.push('--reverse')
-    }
-
-    if(opts.hasOwnProperty('parallel')) {
-      cmd.push(`--parallel=${opts.parallel}`)
-    }
-
-    if(opts.hasOwnProperty('filter')) {
-      cmd.push(`--include='${opts.filter}'`)
-    }
-
-    if(opts.hasOwnProperty('pget')) {
-      cmd.push(`--use-pget-n=${opts.pget}`)
-    }
-
-    if(opts.hasOwnProperty('options')) {
-      cmd.push(opts.options)
-    }
-
-    if(upload) {
-      cmd.push(`${this._escapeShell(localDir)} ${this._escapeShell(remoteDir)}`)
-    } else if(!localDir) {
-      cmd.push(`${this._escapeShell(remoteDir)}`)
     } else {
-      cmd.push(`${this._escapeShell(remoteDir)} ${this._escapeShell(localDir)}`)
-    }
+      const cmd = opts.queue ? ['queue mirror'] : ['mirror']
 
-    return this.raw(cmd.join(' '))
+      if(upload) {
+        cmd.push('--reverse')
+      }
+
+      if(opts.hasOwnProperty('parallel')) {
+        cmd.push(`--parallel=${opts.parallel}`)
+      }
+
+      if(opts.hasOwnProperty('filter')) {
+        cmd.push(`--include='${opts.filter}'`)
+      }
+
+      if(opts.hasOwnProperty('pget')) {
+        cmd.push(`--use-pget-n=${opts.pget}`)
+      }
+
+      if(opts.hasOwnProperty('options')) {
+        cmd.push(opts.options)
+      }
+
+      if(upload) {
+        cmd.push(`${this._escapeShell(localDir)} ${this._escapeShell(remoteDir)}`)
+      } else if(!localDir) {
+        cmd.push(`${this._escapeShell(remoteDir)}`)
+      } else {
+        cmd.push(`${this._escapeShell(remoteDir)} ${this._escapeShell(localDir)}`)
+      }
+
+      return this.raw(cmd.join(' '))
+    }
   }
 
   pget(remotePath, opts = {}) {
     if(!remotePath) {
       this.fail('pget() requires remotePath argument')
+    } else {
+      const cmd = opts.queue ? ['queue pget'] : ['pget']
+
+      const n = opts.n || 4
+      cmd.push(`-n ${n}`)
+      cmd.push(`${this._escapeShell(remotePath)}`)
+
+      const localPath = opts.localPath
+      if(localPath) {
+        cmd.push(`-o ${this._escapeShell(localPath)}`)
+      }
+
+      return this.raw(cmd.join(' '))
     }
-
-    const cmd = opts.queue ? ['queue pget'] : ['pget']
-
-    const n = opts.n || 4
-    cmd.push(`-n ${n}`)
-    cmd.push(`${this._escapeShell(remotePath)}`)
-
-    const localPath = opts.localPath
-    if(localPath) {
-      cmd.push(`-o ${this._escapeShell(localPath)}`)
-    }
-
-    return this.raw(cmd.join(' '))
   }
 }
