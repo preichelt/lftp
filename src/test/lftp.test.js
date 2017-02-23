@@ -20,6 +20,10 @@ const _escapeShellSpyInit = (lftp) => {
   return sinon.spy(lftp, '_escapeShell')
 }
 
+const failStubInit = (lftp) => {
+  return sinon.stub(lftp, 'fail')
+}
+
 test('constructor', (t) => {
   t.plan(4)
 
@@ -75,22 +79,21 @@ test('validateOptions', (t) => {
   t.plan(4)
 
   const lftp = lftpInit()
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.validateOptions({})
-  t.true(failSpy.calledWith('LFTP opts must include host'))
+  t.true(failStub.calledWith('LFTP opts must include host'))
 
   lftp.validateOptions({host: 'host'})
-  t.true(failSpy.calledWith('LFTP opts must include username'))
+  t.true(failStub.calledWith('LFTP opts must include username'))
 
   lftp.validateOptions({host: 'host', username: 'username'})
-  t.true(failSpy.calledWith('LFTP opts must include password'))
+  t.true(failStub.calledWith('LFTP opts must include password'))
 
   lftp.validateOptions({
     host: 'host', username: 'username', password: 'password', protocol: 'ftsp'
   })
-  t.true(failSpy.calledWith('LFTP opts.protocol must be ftp, sftp, or ftps.'))
+  t.true(failStub.calledWith('LFTP opts.protocol must be ftp, sftp, or ftps.'))
 })
 
 test('escapeShell', (t) => {
@@ -237,11 +240,10 @@ test('at', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.at()
-  t.true(failSpy.calledWith('at() requires time argument'))
+  t.true(failStub.calledWith('at() requires time argument'))
 
   lftp.at('time')
   t.true(rawSpy.calledWith('at time'))
@@ -253,11 +255,10 @@ test('attach', (t) => {
 
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.attach()
-  t.true(failSpy.calledWith('attach() requires pid argument'))
+  t.true(failStub.calledWith('attach() requires pid argument'))
 
   lftp.attach('123')
   t.true(rawSpy.calledWith('attach 123'))
@@ -269,14 +270,13 @@ test('bookmark', (t) => {
   const lftp = lftpInit()
   let rawSpy = rawSpyInit(lftp)
   let _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.bookmark()
-  t.true(failSpy.calledWith('bookmark() requires subCmd argument'))
+  t.true(failStub.calledWith('bookmark() requires subCmd argument'))
 
   lftp.bookmark('add')
-  t.true(failSpy.calledWith('bookmark(add) opts argument requires name property'))
+  t.true(failStub.calledWith('bookmark(add) opts argument requires name property'))
 
   lftp.bookmark('add', {name: 'name'})
   t.true(rawSpy.calledWith('bookmark add name'))
@@ -290,7 +290,7 @@ test('bookmark', (t) => {
   rawSpy.reset()
   _escapeShellSpy.reset()
   lftp.bookmark('del')
-  t.true(failSpy.calledWith('bookmark(del) opts argument requires name property'))
+  t.true(failStub.calledWith('bookmark(del) opts argument requires name property'))
 
   lftp.bookmark('del', {name: 'name'})
   t.true(rawSpy.calledWith('bookmark del name'))
@@ -304,7 +304,7 @@ test('bookmark', (t) => {
   rawSpy.reset()
   _escapeShellSpy.reset()
   lftp.bookmark('import')
-  t.true(failSpy.calledWith('bookmark(import) opts argument requires type property'))
+  t.true(failStub.calledWith('bookmark(import) opts argument requires type property'))
 
   lftp.bookmark('import', {type: 'type'})
   t.true(rawSpy.calledWith('bookmark import type'))
@@ -321,11 +321,10 @@ test('cache', (t) => {
 
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.cache()
-  t.true(failSpy.calledWith('cache() requires subCmd argument'))
+  t.true(failStub.calledWith('cache() requires subCmd argument'))
 
   lftp.cache('stat')
   t.true(rawSpy.calledWith('cache stat'))
@@ -341,17 +340,17 @@ test('cache', (t) => {
 
   rawSpy.reset()
   lftp.cache('size')
-  t.true(failSpy.calledWith('cache(size) opts argument requires lim property'))
+  t.true(failStub.calledWith('cache(size) opts argument requires lim property'))
 
   lftp.cache('size', {lim: 1})
   t.true(rawSpy.calledWith('cache size 1'))
 
   rawSpy.reset()
   lftp.cache('expire')
-  t.true(failSpy.calledWith('cache(expire) opts argument requires n and unit properties'))
+  t.true(failStub.calledWith('cache(expire) opts argument requires n and unit properties'))
 
   lftp.cache('expire', {n: 1})
-  t.true(failSpy.calledWith('cache(expire) opts argument requires n and unit properties'))
+  t.true(failStub.calledWith('cache(expire) opts argument requires n and unit properties'))
 
   lftp.cache('expire', {n: 1, unit: 's'})
   t.true(rawSpy.calledWith('cache expire 1s'))
@@ -372,11 +371,10 @@ test('cat', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.cat()
-  t.true(failSpy.calledWith('cat() requires path argument'))
+  t.true(failStub.calledWith('cat() requires path argument'))
 
   lftp.cat('dir/file.ext')
   t.true(rawSpy.calledWith('cat dir/file.ext'))
@@ -389,11 +387,10 @@ test('cd', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.cd()
-  t.true(failSpy.calledWith('cd() requires dir argument'))
+  t.true(failStub.calledWith('cd() requires dir argument'))
 
   lftp.cd('dir/childDir')
   t.true(rawSpy.calledWith('cd dir/childDir'))
@@ -406,14 +403,13 @@ test('chmod', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.chmod()
-  t.true(failSpy.calledWith('chmod() requires mode argument'))
+  t.true(failStub.calledWith('chmod() requires mode argument'))
 
   lftp.chmod('600')
-  t.true(failSpy.calledWith('chmod() requires files argument(s)'))
+  t.true(failStub.calledWith('chmod() requires files argument(s)'))
 
   lftp.chmod('600', 'file1.ext')
   t.true(rawSpy.calledWith('chmod 600 file1.ext'))
@@ -472,14 +468,13 @@ test('edit', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.edit()
-  t.true(failSpy.calledWith('edit() requires file argument'))
+  t.true(failStub.calledWith('edit() requires file argument'))
 
   lftp.edit(1)
-  t.true(failSpy.calledWith('edit() file argument must be a string'))
+  t.true(failStub.calledWith('edit() file argument must be a string'))
 
   lftp.edit('file.ext')
   t.true(rawSpy.calledWith('edit file.ext'))
@@ -524,11 +519,10 @@ test('get', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.get()
-  t.true(failSpy.calledWith('get() require remotePath argument'))
+  t.true(failStub.calledWith('get() require remotePath argument'))
 
   lftp.get('remoteDir/file.ext')
   t.true(rawSpy.calledWith('get remoteDir/file.ext'))
@@ -568,11 +562,10 @@ test('get1', (t) => {
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
   const remoteFile = 'remoteDir/file.ext'
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.get1()
-  t.true(failSpy.calledWith('get1() requires remoteFile argument'))
+  t.true(failStub.calledWith('get1() requires remoteFile argument'))
 
   lftp.get1(remoteFile)
   t.true(rawSpy.calledWith(`get1 ${remoteFile}`))
@@ -612,14 +605,13 @@ test('glob', (t) => {
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
   let command = 'echo'
   const patterns = '*'
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.glob()
-  t.true(failSpy.calledWith('glob() requires patterns argument'))
+  t.true(failStub.calledWith('glob() requires patterns argument'))
 
   lftp.glob(patterns)
-  t.true(failSpy.calledWith('glob() opts argument requires exist, notExist, and/or command properties'))
+  t.true(failStub.calledWith('glob() opts argument requires exist, notExist, and/or command properties'))
 
   lftp.glob(patterns, {command: command})
   t.true(rawSpy.calledWith(`glob ${command} ${patterns}`))
@@ -735,14 +727,13 @@ test('ln', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.ln()
-  t.true(failSpy.calledWith('ln() requires existingFile argument'))
+  t.true(failStub.calledWith('ln() requires existingFile argument'))
 
   lftp.ln('dir/existingFile')
-  t.true(failSpy.calledWith('ln() requires newLink argument'))
+  t.true(failStub.calledWith('ln() requires newLink argument'))
 
   lftp.ln('dir/existingFile', 'anotherDir/newLink')
   t.true(rawSpy.calledWith('ln dir/existingFile anotherDir/newLink'))
@@ -760,11 +751,10 @@ test('local', (t) => {
 
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.local()
-  t.true(failSpy.calledWith('local() requires command argument'))
+  t.true(failStub.calledWith('local() requires command argument'))
 
   lftp.local('pwd')
   t.true(rawSpy.calledWith('local pwd'))
@@ -803,11 +793,10 @@ test('put', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.put()
-  t.true(failSpy.calledWith('put() requires localPath argument'))
+  t.true(failStub.calledWith('put() requires localPath argument'))
 
   lftp.put('localDir/file.ext')
   t.true(rawSpy.calledWith('put localDir/file.ext'))
@@ -825,14 +814,13 @@ test('mv', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.mv()
-  t.true(failSpy.calledWith('mv() requires src argument'))
+  t.true(failStub.calledWith('mv() requires src argument'))
 
   lftp.mv('srcDir/file.ext')
-  t.true(failSpy.calledWith('mv() requires dest argument'))
+  t.true(failStub.calledWith('mv() requires dest argument'))
 
   lftp.mv('srcDir/file.ext', 'destDir/file.ext')
   t.true(rawSpy.calledWith('mv srcDir/file.ext destDir/file.ext'))
@@ -846,11 +834,10 @@ test('rm', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.rm()
-  t.true(failSpy.calledWith('rm() requires files argument(s)'))
+  t.true(failStub.calledWith('rm() requires files argument(s)'))
 
   lftp.rm('file1.ext')
   t.true(rawSpy.calledWith('rm file1.ext'))
@@ -868,11 +855,10 @@ test('rmdir', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.rmdir()
-  t.true(failSpy.calledWith('rmdir() requires directories argument(s)'))
+  t.true(failStub.calledWith('rmdir() requires directories argument(s)'))
 
   lftp.rmdir('dir1')
   t.true(rawSpy.calledWith('rmdir dir1'))
@@ -890,11 +876,10 @@ test('mirror', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.mirror()
-  t.true(failSpy.calledWith('mirror() requires remoteDir argument'))
+  t.true(failStub.calledWith('mirror() requires remoteDir argument'))
 
   lftp.mirror('remoteDir')
   t.true(rawSpy.calledWith('mirror remoteDir'))
@@ -911,7 +896,7 @@ test('mirror', (t) => {
   t.true(_escapeShellSpy.calledWith('localDir'))
 
   lftp.mirror('remoteDir', {upload: true})
-  t.true(failSpy.calledWith('mirror(opts = {upload: true}) opts argument requires localDir property'))
+  t.true(failStub.calledWith('mirror(opts = {upload: true}) opts argument requires localDir property'))
 
   lftp.mirror('remoteDir', {localDir: 'localDir', upload: true})
   t.true(rawSpy.calledWith('mirror --reverse localDir remoteDir'))
@@ -941,11 +926,10 @@ test('pget', (t) => {
   const lftp = lftpInit()
   const rawSpy = rawSpyInit(lftp)
   const _escapeShellSpy = _escapeShellSpyInit(lftp)
-  const failSpy = sinon.spy()
-  lftp.fail = failSpy
+  const failStub = failStubInit(lftp)
 
   lftp.pget()
-  t.true(failSpy.calledWith('pget() requires remotePath argument'))
+  t.true(failStub.calledWith('pget() requires remotePath argument'))
 
   lftp.pget('remoteDir/file.ext')
   t.true(rawSpy.calledWith('pget -n 4 remoteDir/file.ext'))
