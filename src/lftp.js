@@ -2,6 +2,7 @@ import _includes from 'lodash/includes'
 import _map from 'lodash/map'
 import _inRange from 'lodash/inRange'
 import _times from 'lodash/times'
+import _last from 'lodash/last'
 import cp from 'child_process'
 import typeDetect from 'type-detect'
 
@@ -314,6 +315,18 @@ export class LFTP {
     }
 
     return this.raw(cmd.join(' '))
+  }
+
+  command(cmd, args) {
+    if(!cmd) {
+      this.fail('command() requires cmd argument')
+    } else if(!args) {
+      this.fail('command() requires args argument')
+    } else {
+      const cmdString = _last(this[cmd](args).cmds)
+
+      return this.raw(`command ${cmdString}`)
+    }
   }
 
   // NOTE: NEED TO IMPLEMENT

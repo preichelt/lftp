@@ -450,6 +450,23 @@ test('cls', (t) => {
   t.true(rawSpy.calledWith('cls -D'))
 })
 
+test('command', (t) => {
+  t.plan(3)
+
+  const lftp = lftpInit()
+  const rawSpy = rawSpyInit(lftp)
+  const failStub = failStubInit(lftp)
+
+  lftp.command()
+  t.true(failStub.calledWith('command() requires cmd argument'))
+
+  lftp.command('echo')
+  t.true(failStub.calledWith('command() requires args argument'))
+
+  lftp.command('echo', 'test')
+  t.true(rawSpy.calledWith('command echo test'))
+})
+
 test('echo', (t) => {
   t.plan(2)
 

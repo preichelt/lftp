@@ -21,6 +21,10 @@ var _times2 = require('lodash/times');
 
 var _times3 = _interopRequireDefault(_times2);
 
+var _last2 = require('lodash/last');
+
+var _last3 = _interopRequireDefault(_last2);
+
 var _child_process = require('child_process');
 
 var _child_process2 = _interopRequireDefault(_child_process);
@@ -325,6 +329,18 @@ class LFTP {
     }
 
     return this.raw(cmd.join(' '));
+  }
+
+  command(cmd, args) {
+    if (!cmd) {
+      this.fail('command() requires cmd argument');
+    } else if (!args) {
+      this.fail('command() requires args argument');
+    } else {
+      const cmdString = (0, _last3.default)(this[cmd](args).cmds);
+
+      return this.raw(`command ${cmdString}`);
+    }
   }
 
   // NOTE: NEED TO IMPLEMENT
