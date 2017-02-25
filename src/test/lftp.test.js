@@ -560,6 +560,32 @@ test('eval', (t) => {
   t.true(rawSpy.calledWith('eval -f 4mat test'))
 })
 
+test('exit', (t) => {
+  t.plan(6)
+
+  const lftp = lftpInit()
+  const rawSpy = rawSpyInit(lftp)
+  const failStub = failStubInit(lftp)
+
+  lftp.exit()
+  t.true(failStub.calledWith('exit() requires subCmd argument'))
+
+  lftp.exit('bg')
+  t.true(rawSpy.calledWith('exit bg'))
+
+  lftp.exit('top')
+  t.true(rawSpy.calledWith('exit top'))
+
+  lftp.exit('parent')
+  t.true(rawSpy.calledWith('exit parent'))
+
+  lftp.exit('kill')
+  t.true(rawSpy.calledWith('exit kill'))
+
+  lftp.exit('kill', {code: 9})
+  t.true(rawSpy.calledWith('exit kill 9'))
+})
+
 test('find', (t) => {
   t.plan(8)
 

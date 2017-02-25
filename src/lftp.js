@@ -405,10 +405,32 @@ export class LFTP {
     }
   }
 
-  // NOTE: NEED TO IMPLEMENT
-  // exit() {
-  //
-  // }
+  exit(subCmd, opts = {}) {
+    const cmd = ['exit']
+
+    switch(subCmd) {
+      case 'bg':
+        cmd.push('bg')
+        break
+      case 'top':
+        cmd.push('top')
+        break
+      case 'parent':
+        cmd.push('parent')
+        break
+      case 'kill':
+        cmd.push('kill')
+        break
+      default:
+        this.fail('exit() requires subCmd argument')
+    }
+
+    if(opts.hasOwnProperty('code')) {
+      cmd.push(opts.code)
+    }
+
+    this.raw(cmd.join(' '))
+  }
 
   // NOTE: NEED TO IMPLEMENT
   // fg() {
