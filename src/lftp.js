@@ -389,10 +389,21 @@ export class LFTP {
     }
   }
 
-  // NOTE: NEED TO IMPLEMENT
-  // eval() {
-  //
-  // }
+  eval(args, opts = {}) {
+    if(!args) {
+      this.fail('eval() requires args argument')
+    } else {
+      const cmd = ['eval']
+
+      if(opts.hasOwnProperty('format')) {
+        cmd.push(`-f ${opts.format}`)
+      }
+
+      cmd.push(args)
+
+      return this.raw(cmd.join(' '))
+    }
+  }
 
   // NOTE: NEED TO IMPLEMENT
   // exit() {

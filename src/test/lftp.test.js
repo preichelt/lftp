@@ -480,7 +480,7 @@ test('debug', (t) => {
 
   lftp.debug('fail')
   t.true(failStub.calledWith('debug() level argument must be a number or "off"'))
-  
+
   lftp.debug(1)
   t.true(rawSpy.calledWith('debug 1'))
 
@@ -541,6 +541,23 @@ test('edit', (t) => {
   lftp.edit('file.ext', {tempFileLocation: 'dir'})
   t.true(rawSpy.calledWith('edit -o dir file.ext'))
   t.true(_escapeShellSpy.calledWith('file.ext'))
+})
+
+test('eval', (t) => {
+  t.plan(3)
+
+  const lftp = lftpInit()
+  const rawSpy = rawSpyInit(lftp)
+  const failStub = failStubInit(lftp)
+
+  lftp.eval()
+  t.true(failStub.calledWith('eval() requires args argument'))
+
+  lftp.eval('test')
+  t.true(rawSpy.calledWith('eval test'))
+
+  lftp.eval('test', {format: '4mat'})
+  t.true(rawSpy.calledWith('eval -f 4mat test'))
 })
 
 test('find', (t) => {

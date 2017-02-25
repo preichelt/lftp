@@ -343,10 +343,39 @@ class LFTP {
     }
   }
 
-  // NOTE: NEED TO IMPLEMENT
-  // debug(opts = {}) {
-  //
-  // }
+  debug(level, opts = {}) {
+    if (!level) {
+      this.fail('debug() requires level argument');
+    } else if ((0, _typeDetect2.default)(level) === 'string' && level !== 'off') {
+      this.fail('debug() level argument must be a number or "off"');
+    } else {
+      const cmd = ['debug'];
+
+      if (opts.hasOwnProperty('truncate')) {
+        cmd.push('-T');
+      }
+
+      if (opts.hasOwnProperty('outputFile')) {
+        cmd.push(`-o ${this._escapeShell(opts.outputFile)}`);
+      }
+
+      if (opts.hasOwnProperty('context')) {
+        cmd.push('-c');
+      }
+
+      if (opts.hasOwnProperty('pid')) {
+        cmd.push('-p');
+      }
+
+      if (opts.hasOwnProperty('timestamps')) {
+        cmd.push('-t');
+      }
+
+      cmd.push(level);
+
+      return this.raw(cmd.join(' '));
+    }
+  }
 
   echo(str) {
     return this.raw(`echo ${this._escapeShell(str)}`);
@@ -374,10 +403,21 @@ class LFTP {
     }
   }
 
-  // NOTE: NEED TO IMPLEMENT
-  // eval() {
-  //
-  // }
+  eval(args, opts = {}) {
+    if (!args) {
+      this.fail('eval() requires args argument');
+    } else {
+      const cmd = ['eval'];
+
+      if (opts.hasOwnProperty('format')) {
+        cmd.push(`-f ${opts.format}`);
+      }
+
+      cmd.push(args);
+
+      return this.raw(cmd.join(' '));
+    }
+  }
 
   // NOTE: NEED TO IMPLEMENT
   // exit() {
