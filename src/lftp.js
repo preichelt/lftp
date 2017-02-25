@@ -329,10 +329,39 @@ export class LFTP {
     }
   }
 
-  // NOTE: NEED TO IMPLEMENT
-  // debug(opts = {}) {
-  //
-  // }
+  debug(level, opts = {}) {
+    if(!level) {
+      this.fail('debug() requires level argument')
+    } else if(typeDetect(level) === 'string' && level !== 'off') {
+      this.fail('debug() level argument must be a number or "off"')
+    } else {
+      const cmd = ['debug']
+
+      if(opts.hasOwnProperty('truncate')) {
+        cmd.push('-T')
+      }
+
+      if(opts.hasOwnProperty('outputFile')) {
+        cmd.push(`-o ${this._escapeShell(opts.outputFile)}`)
+      }
+
+      if(opts.hasOwnProperty('context')) {
+        cmd.push('-c')
+      }
+
+      if(opts.hasOwnProperty('pid')) {
+        cmd.push('-p')
+      }
+
+      if(opts.hasOwnProperty('timestamps')) {
+        cmd.push('-t')
+      }
+
+      cmd.push(level)
+
+      return this.raw(cmd.join(' '))
+    }
+  }
 
   echo(str) {
     return this.raw(`echo ${this._escapeShell(str)}`)
