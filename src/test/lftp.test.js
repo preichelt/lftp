@@ -450,6 +450,60 @@ test('cls', (t) => {
   t.true(rawSpy.calledWith('cls -D'))
 })
 
+test('command', (t) => {
+  t.plan(3)
+
+  const lftp = lftpInit()
+  const rawSpy = rawSpyInit(lftp)
+  const failStub = failStubInit(lftp)
+
+  lftp.command()
+  t.true(failStub.calledWith('command() requires cmd argument'))
+
+  lftp.command('echo')
+  t.true(failStub.calledWith('command() requires args argument'))
+
+  lftp.command('echo', 'test')
+  t.true(rawSpy.calledWith('command echo test'))
+})
+
+test('debug', (t) => {
+  t.plan(10)
+
+  const lftp = lftpInit()
+  const rawSpy = rawSpyInit(lftp)
+  const _escapeShellSpy = _escapeShellSpyInit(lftp)
+  const failStub = failStubInit(lftp)
+
+  lftp.debug()
+  t.true(failStub.calledWith('debug() requires level argument'))
+
+  lftp.debug('fail')
+  t.true(failStub.calledWith('debug() level argument must be a number or "off"'))
+
+  lftp.debug(1)
+  t.true(rawSpy.calledWith('debug 1'))
+
+  lftp.debug('off')
+  t.true(rawSpy.calledWith('debug off'))
+
+  lftp.debug(1, {truncate: true})
+  t.true(rawSpy.calledWith('debug -T 1'))
+
+  lftp.debug(1, {outputFile: 'file.ext'})
+  t.true(rawSpy.calledWith('debug -o file.ext 1'))
+  t.true(_escapeShellSpy.calledWith('file.ext'))
+
+  lftp.debug(1, {context: true})
+  t.true(rawSpy.calledWith('debug -c 1'))
+
+  lftp.debug(1, {pid: true})
+  t.true(rawSpy.calledWith('debug -p 1'))
+
+  lftp.debug(1, {timestamps: true})
+  t.true(rawSpy.calledWith('debug -t 1'))
+})
+
 test('echo', (t) => {
   t.plan(2)
 
@@ -487,6 +541,65 @@ test('edit', (t) => {
   lftp.edit('file.ext', {tempFileLocation: 'dir'})
   t.true(rawSpy.calledWith('edit -o dir file.ext'))
   t.true(_escapeShellSpy.calledWith('file.ext'))
+})
+
+test('eval', (t) => {
+  t.plan(3)
+
+  const lftp = lftpInit()
+  const rawSpy = rawSpyInit(lftp)
+  const failStub = failStubInit(lftp)
+
+  lftp.eval()
+  t.true(failStub.calledWith('eval() requires args argument'))
+
+  lftp.eval('test')
+  t.true(rawSpy.calledWith('eval test'))
+
+  lftp.eval('test', {format: '4mat'})
+  t.true(rawSpy.calledWith('eval -f 4mat test'))
+})
+
+test('exit', (t) => {
+  t.plan(6)
+
+  const lftp = lftpInit()
+  const rawSpy = rawSpyInit(lftp)
+  const failStub = failStubInit(lftp)
+
+  lftp.exit()
+  t.true(failStub.calledWith('exit() requires subCmd argument'))
+
+  lftp.exit('bg')
+  t.true(rawSpy.calledWith('exit bg'))
+
+  lftp.exit('top')
+  t.true(rawSpy.calledWith('exit top'))
+
+  lftp.exit('parent')
+  t.true(rawSpy.calledWith('exit parent'))
+
+  lftp.exit('kill')
+  t.true(rawSpy.calledWith('exit kill'))
+
+  lftp.exit('kill', {code: 9})
+  t.true(rawSpy.calledWith('exit kill 9'))
+})
+
+test('fg', (t) => {
+  t.plan(3)
+
+  const lftp = lftpInit()
+  const waitStub = sinon.stub(lftp, 'wait')
+
+  lftp.fg()
+  t.true(waitStub.called)
+
+  lftp.fg(1)
+  t.true(waitStub.calledWith(1))
+
+  lftp.fg('all')
+  t.true(waitStub.calledWith('all'))
 })
 
 test('find', (t) => {
@@ -947,4 +1060,20 @@ test('pget', (t) => {
   lftp.pget('remoteDir/file.ext', {queue: true})
   t.true(rawSpy.calledWith('queue pget -n 4 remoteDir/file.ext'))
   t.true(_escapeShellSpy.calledWith('remoteDir/file.ext'))
+})
+
+test('wait', (t) => {
+  t.plan(3)
+
+  const lftp = lftpInit()
+  const rawSpy = rawSpyInit(lftp)
+
+  lftp.wait()
+  t.true(rawSpy.calledWith('wait'))
+
+  lftp.wait(1)
+  t.true(rawSpy.calledWith('wait 1'))
+
+  lftp.wait('all')
+  t.true(rawSpy.calledWith('wait all'))
 })
