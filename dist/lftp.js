@@ -446,10 +446,9 @@ class LFTP {
     this.raw(cmd.join(' '));
   }
 
-  // NOTE: NEED TO IMPLEMENT
-  // fg() {
-  //
-  // }
+  fg(jobNo) {
+    this.wait(jobNo);
+  }
 
   find(opts = {}) {
     const cmd = ['find'];
@@ -772,6 +771,16 @@ class LFTP {
 
       return this.raw(cmd.join(' '));
     }
+  }
+
+  wait(jobNo) {
+    const cmd = ['wait'];
+
+    if (jobNo) {
+      cmd.push(jobNo);
+    }
+
+    this.raw(cmd.join(' '));
   }
 }
 exports.LFTP = LFTP;

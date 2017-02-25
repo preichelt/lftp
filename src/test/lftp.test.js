@@ -586,6 +586,22 @@ test('exit', (t) => {
   t.true(rawSpy.calledWith('exit kill 9'))
 })
 
+test('fg', (t) => {
+  t.plan(3)
+
+  const lftp = lftpInit()
+  const waitStub = sinon.stub(lftp, 'wait')
+
+  lftp.fg()
+  t.true(waitStub.called)
+
+  lftp.fg(1)
+  t.true(waitStub.calledWith(1))
+
+  lftp.fg('all')
+  t.true(waitStub.calledWith('all'))
+})
+
 test('find', (t) => {
   t.plan(8)
 
@@ -1044,4 +1060,20 @@ test('pget', (t) => {
   lftp.pget('remoteDir/file.ext', {queue: true})
   t.true(rawSpy.calledWith('queue pget -n 4 remoteDir/file.ext'))
   t.true(_escapeShellSpy.calledWith('remoteDir/file.ext'))
+})
+
+test('wait', (t) => {
+  t.plan(3)
+
+  const lftp = lftpInit()
+  const rawSpy = rawSpyInit(lftp)
+
+  lftp.wait()
+  t.true(rawSpy.calledWith('wait'))
+
+  lftp.wait(1)
+  t.true(rawSpy.calledWith('wait 1'))
+
+  lftp.wait('all')
+  t.true(rawSpy.calledWith('wait all'))
 })
